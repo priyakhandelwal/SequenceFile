@@ -9,6 +9,7 @@ import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.io.SequenceFile.Writer;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 
 import com.sample.sequence.utils.Create;
 
@@ -21,7 +22,7 @@ public class SequenceFileAppend {
 	
 	public void createfile(Create create) throws IOException {
 		Text key = new Text();
-		Text value = new Text();
+		Value value = new Value();
 		
 		Configuration conf = new Configuration();
 		conf.set("io.serializations",
@@ -31,7 +32,7 @@ public class SequenceFileAppend {
 		    
 		FileSystem fs = FileSystem.get(conf);
 		
-		Path file = new Path("/Users/prkhandelwal/Desktop/Sample/SequenceFile/samplop");
+		Path file = new Path("/Users/prkhandelwal/Desktop/Sample/SequenceFile/seqwithmetainvalue");
 	    
 	    System.out.println("File exist = " + fs.exists(file));
 	    
@@ -44,18 +45,13 @@ public class SequenceFileAppend {
 	    
 	    Writer writer = SequenceFile.createWriter(conf, SequenceFile.Writer.file(file),
 	            SequenceFile.Writer.keyClass(Text.class),
-	            SequenceFile.Writer.valueClass(Text.class),
+	            SequenceFile.Writer.valueClass(Value.class),
 	            SequenceFile.Writer.appendIfExists(true), metadataOption);
 	    
-	    writer.append(new Text(create.getPathName()), new Text(create.getContent()));
+	    key.set(create.getPathName());
+	    value.setMetadata(create.getMetadata());
+	    value.setContent(create.getContent());
+	    writer.append(key, value);
 	    writer.close();
-	    
-	    Reader reader = new Reader(conf, Reader.file(file));
-	    
-	    while (reader.next(key, value)) {
-	    	System.out.println(value);
-	    }
-	    	    
-	    reader.close();	 
 	}
 }

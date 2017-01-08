@@ -12,6 +12,7 @@ import javax.ws.rs.core.*;
 import com.sample.sequence.utils.SequenceFileAppend;
 import com.sample.sequence.utils.SequenceFileReader;
 import com.sample.sequence.utils.Create;
+import com.sample.sequence.utils.Value;
 
 /**
  * 
@@ -43,11 +44,10 @@ public class Storage {
 	public Response getFileContent(@PathParam("filename") String filename) {
 		System.out.println("filename = " + filename);
 		SequenceFileReader sequenceFileReader = new SequenceFileReader(); 
-		String result = sequenceFileReader.getContent(filename);
+		Value result = sequenceFileReader.getContent(filename);
 		
 		if (result != null) {
-			System.out.println("result = " + result);
-			return Response.status(200).entity(result).build();
+			return Response.status(200).entity(result.toString()).build();
 		} else {
 			return Response.status(404).entity("Not found").build();
 		}

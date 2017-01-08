@@ -2,6 +2,7 @@ package com.sample.sequence.utils;
 
 public class Create {
 	String pathName;
+	String metadata;
 	String content;
 
 	public String getPathName() {
@@ -18,5 +19,13 @@ public class Create {
 
 	public void setContent(String content) {
 		this.content = content;
+	}
+
+	public String getMetadata() {
+		return metadata;
+	}
+
+	public void setMetadata(String metadata) {
+		this.metadata = metadata;
 	}
 }
