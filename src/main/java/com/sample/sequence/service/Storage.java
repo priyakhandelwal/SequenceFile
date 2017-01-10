@@ -8,11 +8,13 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.*;
 import com.sample.sequence.utils.SequenceFileAppend;
 import com.sample.sequence.utils.SequenceFileReader;
 import com.sample.sequence.utils.Create;
 import com.sample.sequence.utils.Value;
+import com.sample.sequence.utils.FileUtil;
 
 /**
  * 
@@ -41,30 +43,20 @@ public class Storage {
 	@GET
 	@Path("/get/{filename}")
 	@Produces(MediaType.TEXT_PLAIN)
-	public Response getFileContent(@PathParam("filename") String filename) {
-		System.out.println("filename = " + filename);
+	public Response getFileContent(@PathParam("filename") String filename, @QueryParam("writetofile") boolean writetofile) {
+		
 		SequenceFileReader sequenceFileReader = new SequenceFileReader(); 
 		Value result = sequenceFileReader.getContent(filename);
 		
 		if (result != null) {
+			if (writetofile) {
+				FileUtil filewriter = new FileUtil();
+				filewriter.writeToFile(result.toString(), filename);
+			}
 			return Response.status(200).entity(result.toString()).build();
 		} else {
 			return Response.status(404).entity("Not found").build();
 		}
 		
 	}
-	
-	@GET
-	@Path("/test")
-	public Response test() {
-		return Response.status(200).entity("Yay gotcha!").build();
-	}
-	
-	@GET
-    @Path("/intextform")
-    @Produces(MediaType.TEXT_PLAIN)
-    public String helloWorld(){
-        return "Hello from Jersey!";
-
-       }
 }

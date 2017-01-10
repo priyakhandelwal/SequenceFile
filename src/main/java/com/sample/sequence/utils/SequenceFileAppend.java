@@ -3,15 +3,10 @@ package com.sample.sequence.utils;
 import java.io.IOException;
 
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.SequenceFile.Reader;
 import org.apache.hadoop.io.SequenceFile.Writer;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
-
-import com.sample.sequence.utils.Create;
 
 /**
  * 
@@ -21,32 +16,33 @@ import com.sample.sequence.utils.Create;
 public class SequenceFileAppend {
 	
 	public void createfile(Create create) throws IOException {
+		long byteoffset;
+		String filePath = "/Users/prkhandelwal/Desktop/Sample/SequenceFile/storage";
+		
 		Text key = new Text();
 		Value value = new Value();
-		
 		Configuration conf = new Configuration();
+		FileUtil fileutil = new FileUtil();
+		LocationMapper locationMapper = new LocationMapper();
+		
 		conf.set("io.serializations",
 		        "org.apache.hadoop.io.serializer.WritableSerialization");
 
-		    conf.set("fs.file.impl", "org.apache.hadoop.fs.RawLocalFileSystem");
-		    
-		FileSystem fs = FileSystem.get(conf);
+		conf.set("fs.file.impl", "org.apache.hadoop.fs.RawLocalFileSystem");
 		
-		Path file = new Path("/Users/prkhandelwal/Desktop/Sample/SequenceFile/seqwithmetainvalue");
-	    
-	    System.out.println("File exist = " + fs.exists(file));
-	    
-	    Text key1 = new Text("Key1");
-	    Text value1 = new Text("Value1");
+		Path file = new Path(filePath);
 	    
 	    SequenceFile.Metadata metadata = new SequenceFile.Metadata();
-	    metadata.set(key1, value1);
+	    metadata.set(new Text("Key1"), new Text("Value1"));
 	    Writer.Option metadataOption = Writer.metadata(metadata);
 	    
 	    Writer writer = SequenceFile.createWriter(conf, SequenceFile.Writer.file(file),
 	            SequenceFile.Writer.keyClass(Text.class),
 	            SequenceFile.Writer.valueClass(Value.class),
 	            SequenceFile.Writer.appendIfExists(true), metadataOption);
+	    
+	    byteoffset = fileutil.getByteOffset(create.getPathName());
+	    locationMapper.saveLocation(create.getPathName(), byteoffset);
 	    
 	    key.set(create.getPathName());
 	    value.setMetadata(create.getMetadata());

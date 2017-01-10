@@ -7,7 +7,6 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.io.Writable;
 
 /**
  * 
@@ -17,14 +16,16 @@ import org.apache.hadoop.io.Writable;
 public class SequenceFileReader{
 	public Value getContent(String filename) {
 		Configuration conf = new Configuration();
-//		String content = null;
+		LocationMapper locationMapper = new LocationMapper();
+		long location;
+		
 		Value result = null;
 		conf.set("io.serializations",
 		        "org.apache.hadoop.io.serializer.WritableSerialization");
 
 		conf.set("fs.file.impl", "org.apache.hadoop.fs.RawLocalFileSystem");
 		FileSystem fs;
-		Path path = new Path("/Users/prkhandelwal/Desktop/Sample/SequenceFile/seqwithmetainvalue");
+		Path path = new Path("/Users/prkhandelwal/Desktop/Sample/SequenceFile/storage");
 		
 		try {
 			fs = FileSystem.get(conf);
@@ -38,6 +39,8 @@ public class SequenceFileReader{
 			reader = new SequenceFile.Reader(conf, SequenceFile.Reader.file(path));
 			Text key = new Text();
 			Value value = new Value();
+			location = locationMapper.getKeyLocation(filename);
+			reader.seek(location);
 
 			while (reader.next(key, value)) {
 				System.out.println("key filename " + key);
