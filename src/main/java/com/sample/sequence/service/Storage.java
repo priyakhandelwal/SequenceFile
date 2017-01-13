@@ -22,7 +22,7 @@ import com.sample.sequence.utils.FileUtil;
  *	Sample class file to append content to an existing sequence file
  */
 
-@Path("/sample")
+@Path("/v1")
 public class Storage {
 	@POST
 	@Path("/create")

@@ -1,5 +1,6 @@
 package com.sample.sequence.utils;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -13,20 +14,27 @@ public class LocationMapper {
 		long location = -1;
 		FileInputStream in = new FileInputStream(mapperFile);
 		keyMapper.load(in);
-		System.out.println("key = " + key);
+
 		if (keyMapper.getProperty(key) != null) {
 			location = Long.parseLong(keyMapper.getProperty(key));
-			System.out.println("location = " + location);
-			System.out.println(location);
 		} 
-		
+		in.close();
 		return location;
 	}
 	
 	public void saveLocation(String key, long location) throws IOException {
+		File file = new File(mapperFile);
+		FileInputStream in = null;
+		if (file.exists()) {
+			in = new FileInputStream(mapperFile);
+			keyMapper.load(in);
+		}
 		keyMapper.setProperty(key, Long.toString(location));
 		FileOutputStream out = new FileOutputStream(mapperFile);
 		keyMapper.store(out, null);
 		out.close();
+		if (in != null) {
+			in.close();
+		}
 	}
 }

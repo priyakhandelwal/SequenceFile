@@ -6,9 +6,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class FileUtil {
-	private String filePath = "/Users/prkhandelwal/Desktop/Sample/SequenceFile/storage_output";
-	
 	public void writeToFile(String result, String filename) {
+		String filePath = "/Users/prkhandelwal/Desktop/Sample/SequenceFile/storage_output";
 		BufferedWriter bw = null;
 		FileWriter fw = null;
 		
@@ -16,7 +15,6 @@ public class FileUtil {
 			fw = new FileWriter(filePath + "/" + filename);
 			bw = new BufferedWriter(fw);
 			bw.write(result);
-			System.out.println("Done writing to file " + filename);
 		} catch (IOException e) {
 			e.printStackTrace();
 		} finally {
@@ -35,7 +33,11 @@ public class FileUtil {
 	
 	public long getByteOffset(String filePath) {
 		File file = new File(filePath);
-		long bytesize = file.length(); 
+		
+		long bytesize = -1;
+		if (file.exists()) {
+			bytesize = file.length();
+		} 
 		return bytesize;
 	}
 }

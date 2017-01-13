@@ -11,7 +11,7 @@ import org.apache.hadoop.io.Text;
 /**
  * 
  * @author prkhandelwal
- *	Sample class file to append content to an existing sequence file
+ *	Sample class file to append content to a sequence file
  */
 public class SequenceFileAppend {
 	
@@ -41,7 +41,7 @@ public class SequenceFileAppend {
 	            SequenceFile.Writer.valueClass(Value.class),
 	            SequenceFile.Writer.appendIfExists(true), metadataOption);
 	    
-	    byteoffset = fileutil.getByteOffset(create.getPathName());
+	    byteoffset = fileutil.getByteOffset(filePath);
 	    locationMapper.saveLocation(create.getPathName(), byteoffset);
 	    
 	    key.set(create.getPathName());
