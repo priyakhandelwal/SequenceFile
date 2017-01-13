@@ -2,10 +2,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.sample</groupId>
-  <artifactId>sequence</artifactId>
+  <artifactId>storage</artifactId>
   <packaging>war</packaging>
   <version>0.0.1-SNAPSHOT</version>
-  <name>sequence Maven Webapp</name>
+  <name>storage Maven Webapp</name>
   <url>http://maven.apache.org</url>
   <dependencies>
   	<!-- https://mvnrepository.com/artifact/org.glassfish.jersey.containers/jersey-container-servlet-core -->
@@ -73,6 +73,6 @@
 	
   </dependencies>
   <build>
-    <finalName>sequence</finalName>
+    <finalName>storage</finalName>
   </build>
 </project>

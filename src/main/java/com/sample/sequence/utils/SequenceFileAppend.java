@@ -41,7 +41,7 @@ public class SequenceFileAppend {
 	            SequenceFile.Writer.valueClass(Value.class),
 	            SequenceFile.Writer.appendIfExists(true), metadataOption);
 	    
-	    byteoffset = fileutil.getByteOffset(create.getPathName());
+	    byteoffset = fileutil.getByteOffset(filePath);
 	    locationMapper.saveLocation(create.getPathName(), byteoffset);
 	    
 	    key.set(create.getPathName());
