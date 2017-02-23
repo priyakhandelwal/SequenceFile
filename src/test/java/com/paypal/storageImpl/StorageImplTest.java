@@ -9,6 +9,7 @@ import java.io.ObjectOutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import org.junit.Before;
 import org.junit.Ignore;
@@ -18,21 +19,12 @@ public class StorageImplTest {
 	private StorageImpl storage;
 	private Map<String, String> metadata;
 	private byte[] meta;
-	private String filename;
-	private String mockContent;
+	private String filename = "perf6001.jpeg";
+	private String mockContent = "Try and test";
 	
 	@Before
 	public void setupForEachTest() throws IOException {
 		storage = new StorageImpl();
-		metadata = new HashMap<String, String>();
-		filename = "test5.jpeg";
-		metadata.put("filename", filename);
-		ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-		ObjectOutputStream out = new ObjectOutputStream(byteOut);
-		out.writeObject(metadata);
-		out.close();
-		meta = byteOut.toByteArray();
-		mockContent = "randomarraybytesfortestingtest2array";
 	}
 	
 	@Ignore
@@ -47,9 +39,39 @@ public class StorageImplTest {
 		assertEquals(true, Arrays.equals(mockContent.getBytes(), storage.read(filename)));
 	}
 	
-//	@Ignore
+	@Ignore
 	@Test
 	public void getMetaDataTest() throws IOException {
 		assertEquals(true, Arrays.equals(meta, storage.getMetadata(filename)));
+	}
+	
+	@Ignore
+	@Test
+	public void createTestPerformance() throws IOException, InterruptedException {
+		byte[] meta = new byte[100000];
+		new Random().nextBytes(meta);
+		byte[] mockdata = new byte[100000];
+		new Random().nextBytes(mockdata);
+		
+		Long startTime = System.currentTimeMillis();
+		for (int i=5001; i<6000; i++) {
+			filename = "perf" + i + ".jpeg";
+			storage.create(filename, mockdata, metadata);
+		}
+		Long endTime = System.currentTimeMillis();
+		System.out.println(endTime-startTime);
+		
+	}
+	
+	@Ignore
+	@Test
+	public void readTestPerformance() throws IOException {
+		Long startTime = System.currentTimeMillis();
+		for (int i=5001; i<6000; i++) {
+			filename = "perf" + i + ".jpeg";
+			storage.read(filename);
+		}
+		Long endTime = System.currentTimeMillis();
+		System.out.println(endTime-startTime);
 	}
 }

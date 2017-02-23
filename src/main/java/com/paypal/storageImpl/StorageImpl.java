@@ -11,32 +11,44 @@ import java.io.RandomAccessFile;
 import java.util.Map;
 import java.util.Properties;
 import com.paypal.storage.Storage;
+import com.paypal.storage.util.FileUtil;
 
 public class StorageImpl implements Storage{
 	
-	private String path = "/Users/prkhandelwal/Desktop/Sample/Dat-output/storage.dat";
-	private String mapperFile = "/Users/prkhandelwal/Desktop/Sample/Dat-storage/storage-mapper.properties";
+	private final FileUtil fileUtil = FileUtil.getInstance();
 	
-	public boolean create(String filename, byte[] content, Map<String, String> metadata) throws IOException {
+	public boolean create(String filename, byte[] content, Map<String, String> metadata) {
 		boolean isCreated = false;
-		byte[] meta = getByteArrayMetadata(metadata);
-		isCreated = writeToFile(filename, path, meta, content);
+		byte[] meta;
+		
+		try {
+			meta = convertMetadataInBytes(metadata);
+			long metalocation = fileUtil.getFile().length();
+			long contentLocation = fileUtil.getFile().length() + meta.length;
+			
+			isCreated = writeToFile(filename, meta, content);
+			
+			if (isCreated) {
+				saveMetaAndContentsLengthAndLocation(filename, metalocation, meta.length, contentLocation, content.length);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 		return isCreated;
 	}
 	
-	public byte[] read(String filename) throws FileNotFoundException {
+	public byte[] read(String filename) {
 		long contentLocation;
 		int contentSize;
 		byte [] content = null;
-		RandomAccessFile file ;
+
 		try {
-			contentLocation = getContentLocation(filename);
-			contentSize = getContentLength(filename);
+			contentLocation = Long.parseLong(getMetaAndContentsLengthAndLocation(filename)[2]);
+			contentSize = Integer.parseInt(getMetaAndContentsLengthAndLocation(filename)[3]);
 			content = new byte[contentSize];
-			file = new RandomAccessFile(path, "r");
-			file.seek(contentLocation);
-			file.read(content);
-			file.close();
+			fileUtil.getFile().seek(contentLocation);
+			fileUtil.getFile().read(content);
 		} catch (IOException e1) {
 			e1.printStackTrace();
 		}
@@ -49,15 +61,13 @@ public class StorageImpl implements Storage{
 		long metaLocation;
 		int metaSize;
 		byte [] metadata = null;
-		RandomAccessFile file ;
+		
 		try {
-			metaLocation = getMetaLocation(filename);
-			metaSize = getMetaLength(filename);
+			metaLocation = Long.parseLong(getMetaAndContentsLengthAndLocation(filename)[0]);
+			metaSize = Integer.parseInt(getMetaAndContentsLengthAndLocation(filename)[1]);
 			metadata = new byte[metaSize];
-			file = new RandomAccessFile(path, "r");
-			file.seek(metaLocation);
-			file.read(metadata);
-			file.close();
+			fileUtil.getFile().seek(metaLocation);
+			fileUtil.getFile().read(metadata);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -65,87 +75,35 @@ public class StorageImpl implements Storage{
 		
 	}
 	
-	private boolean writeToFile(String filename, String path, byte[] metadata, byte[] content) throws IOException {
-		long contentLocation;
-		long metalocation;
-		
-		RandomAccessFile file = new RandomAccessFile(path, "rw");
-		file.seek(file.length());
-		metalocation = file.length();
-		file.write(metadata);
-		contentLocation = file.getFilePointer();
-		file.write(content);
-		saveLengthAndLocation(filename, metalocation, metadata.length, contentLocation, content.length);
-		file.close();
+	private boolean writeToFile(String filename, byte[] metadata, byte[] content) throws IOException {
+		fileUtil.getFile().seek(fileUtil.getFile().length());
+		fileUtil.getFile().write(metadata);
+		fileUtil.getFile().write(content);
+
 		return true;
 	}
 
-	private byte[] getByteArrayMetadata(Map<String, String> map) throws IOException {
+	private byte[] convertMetadataInBytes(Map<String, String> metadata) throws IOException {
 		ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
 		ObjectOutputStream out = new ObjectOutputStream(byteOut);
-		out.writeObject(map);
+		out.writeObject(metadata);
 		out.close();
 		return byteOut.toByteArray();
 	}
 	
-	private void saveLengthAndLocation(String key, long Metalocation, int Metalength, long contentLocation, int contentLength) throws IOException {
-		
-		File file = new File(mapperFile);
-		FileInputStream in = null;
-		Properties keyMapper = new Properties();
-		if (file.exists()) {
-			in = new FileInputStream(mapperFile);
-			keyMapper.load(in);
-		}
-		keyMapper.setProperty(key, Long.toString(Metalocation) + "-" + Integer.toString(Metalength) +  "-" + Long.toString(contentLocation) + "-" + Integer.toString(contentLength));
-		FileOutputStream out = new FileOutputStream(mapperFile);
-		keyMapper.store(out, null);
-		out.close();
-		if (in != null) {
-			in.close();
-		}
+	private void saveMetaAndContentsLengthAndLocation(String key, long Metalocation, int Metalength, long contentLocation, int contentLength) throws IOException {
+		fileUtil.getKeyMapper().setProperty(key, Long.toString(Metalocation) + "-" + Integer.toString(Metalength) +  "-" + Long.toString(contentLocation) + "-" + Integer.toString(contentLength));
+		fileUtil.getKeyMapper().store(fileUtil.getFileOutputStream(), null);
 	}
 	
-	private long getContentLocation(String filename) throws IOException {
-		String value = getFileProperties(filename);
-		String [] values = value.split("-");
-		
-		return Long.parseLong(values[2]);
-		
-	}
-	
-	private int getContentLength(String filename) throws IOException {
-		String value = getFileProperties(filename);
-		String [] values = value.split("-");
-		return Integer.parseInt(values[3]);
-		
-	}
-	
-	private long getMetaLocation(String filename) throws IOException {
-		String value = getFileProperties(filename);
-		String [] values = value.split("-");
-		
-		return Long.parseLong(values[0]);
-		
-	}
-	
-	private int getMetaLength(String filename) throws IOException {
-		String value = getFileProperties(filename);
-		String [] values = value.split("-");
-		return Integer.parseInt(values[1]);
-		
-	}
-	
-	private String getFileProperties(String key) throws IOException {
-    	String value = null;
-		Properties keyMapper = new Properties();
-		FileInputStream in = new FileInputStream(mapperFile);
-		keyMapper.load(in);
 
-		if (keyMapper.getProperty(key) != null) {
-			value = keyMapper.getProperty(key);
+	private String[] getMetaAndContentsLengthAndLocation(String key) throws IOException {
+    	String value = null;
+    	String [] metaAndContent = new String[4];
+		if (fileUtil.getKeyMapper().getProperty(key) != null) {
+			value = fileUtil.getKeyMapper().getProperty(key);
 		} 
-		in.close();
-		return value;
+		metaAndContent = value.split("-");
+		return metaAndContent;
 	}
 }
