@@ -10,7 +10,6 @@ import java.util.Properties;
 
 public class FileUtil {
 	private static FileUtil instance;
-	private static final String PATH = "/Users/prkhandelwal/Desktop/Sample/Dat-output/storage-test1.dat";
 	private static final String MAPPER_FILE = "/Users/prkhandelwal/Desktop/Sample/Dat-storage/storage-mapper-test1.properties";
 	
 	private FileInputStream fileInputStream;
@@ -19,7 +18,7 @@ public class FileUtil {
 	private Properties keyMapper = new Properties();
 	private FileOutputStream fileOutputStream;
 
-	private FileUtil() {
+	private FileUtil(String PATH) {
 		try {
 			file = new RandomAccessFile(PATH, "rw");
 			if ((new File(MAPPER_FILE)).exists()) {
@@ -36,11 +35,11 @@ public class FileUtil {
 	}
 	
 	
-	public static FileUtil getInstance() {
+	public static FileUtil getInstance(String PATH) {
 		if (instance == null) {
 			synchronized(FileUtil.class) {
 				if (instance == null) {
-					instance = new FileUtil();
+					instance = new FileUtil(PATH);
 				}
 			}
 		}

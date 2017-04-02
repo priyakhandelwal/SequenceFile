@@ -1,21 +1,17 @@
 package com.paypal.storageImpl;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.io.RandomAccessFile;
 import java.util.Map;
-import java.util.Properties;
+
 import com.paypal.storage.Storage;
 import com.paypal.storage.util.FileUtil;
 
 public class StorageImpl implements Storage{
+	private static final String PATH = "/Users/prkhandelwal/Desktop/Sample/Dat-output/storage-test1.dat";
 	
-	private final FileUtil fileUtil = FileUtil.getInstance();
+	private final FileUtil fileUtil = FileUtil.getInstance(PATH);
 	
 	public boolean create(String filename, byte[] content, Map<String, String> metadata) {
 		boolean isCreated = false;
